@@ -1,3 +1,5 @@
+
+
 #cursor.execute("DELETE FROM servers")
 #cursor.execute("DELETE FROM votekick")
 #cursor.execute("DELETE FROM vip_block")
@@ -55,8 +57,6 @@ import math
 
 client = commands.Bot(command_prefix=['d.'], intents=discord.Intents.all())
 client.remove_command("help")
-
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GY-DAy.MR7qmCv8OfcajJIdmHU3eMKNWETO9r-VZiAwu0"
 
 @client.event
 async def on_ready():
@@ -138,7 +138,7 @@ async def buschhousing(content: discord.Interaction, bhousing:discord.app_comman
                                discord.app_commands.Choice(name="Pell Hall", value="C11"),
                                discord.app_commands.Choice(name="Sojourner Truth Apartments", value="C12"),
                                discord.app_commands.Choice(name="Stonier Hall", value="C13"),
-                               discord.app_commands.Choice(name="Silvers Apartments", value="C14"),
+                               discord.app_commands.Choice(name="Tinsley Hall", value="C14"),
                                discord.app_commands.Choice(name="Eastern Ave Apartments", value="C15"),
                                discord.app_commands.Choice(name="Wessels Hall", value="C16"),
                                ])
@@ -192,5 +192,17 @@ async def livihousing(content: discord.Interaction, lhousing:discord.app_command
                                ])
 async def buschclass(content: discord.Interaction, buschclasslocation:discord.app_commands.Choice[str], starttime:str, endtime:str):
    await content.response.send_message(content=f"{buschclasslocation.name},{buschclasslocation.value}")
+
+@client.tree.command(name="liviclass", description="Step 2: Enter Class Location and Timings")
+@discord.app_commands.choices(liviclasslocation=
+                              [discord.app_commands.Choice(name="(BE) Beck Hall", value="1L"),
+                               discord.app_commands.Choice(name="(LSH) Lucy Stone Hall", value="2L"),
+                               discord.app_commands.Choice(name="(LSH-AUD) Lucy Stone Hall Auditorium", value="3L"),
+                               discord.app_commands.Choice(name="(RC) Rutgers Cinema", value="4L"),
+                               discord.app_commands.Choice(name="(TIL) Tillett Hall", value="5L"),
+                               ])
+async def liviclass(content: discord.Interaction, liviclasslocation:discord.app_commands.Choice[str], starttime:str, endtime:str):
+   await content.response.send_message(content=f"{liviclasslocation.name},{liviclasslocation.value}")
+
 
 client.run(discordtoken)
