@@ -5,16 +5,6 @@
 #cursor.execute("DELETE FROM vip_block")
 #mycon.commit()
 
-def serverentry(content):
-    cursor.execute(f"SELECT * FROM servers WHERE id={content.guild.id}")
-    data=cursor.fetchone()
-    if data==None:
-        #cursor.execute(f"INSERT INTO servers VALUES({content.guild.id},{content.guild.name},\"F\",0,\"F\")")
-        #cursor.execute("INSERT INTO table VALUES (%s, %s, %s, %s, %s)", (content.guild.id, content.guild.name, "F",0,"F"))
-        cursor.execute("INSERT INTO servers VALUES (%s,%s,%s,%s,%s)", (content.guild.id, content.guild.name, "F", 0, "F"))
-        mycon.commit()
-    return data
-
 '''
 CREATE database dragbot;
 Use dragbot;
@@ -65,40 +55,7 @@ async def on_ready():
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/dragme"))
   await client.tree.sync()
 
-@client.tree.command(name="help", description="Help command.")
-async def help(content: discord.Interaction):
-    serverentry(content)
-    info="__**Use me to ask for drags or send VC invites!**__\n**Drag users with consent:** /dragme and tag member in slash command tab.\n**Invite users with consent:** /vcinvite and tag member in slash command tab.\n**Vote kick users in the VC (4 or more server members):** /votekick and tag member in slash command tab.(BETA-TESTING)"
-    buttons=Empty()
-    await content.response.send_message(content=info, view=buttons)
-
-class Empty(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-    async def Empty(self,content:discord.Interaction):
-        await content.response.send_message(view=self)
-
-@client.tree.command(name="denydrags", description="Specify which VC should not allow drags.")
-@discord.app_commands.checks.has_permissions(manage_messages=True, move_members=True)
-async def denydrags(content: discord.Interaction, voice:discord.VoiceChannel):
-    data=serverentry(content)
-    if data[2] == "T":
-        cursor.execute(f"SELECT * FROM blocked_vc WHERE server_id={content.guild.id} AND vc_id={voice.id}")
-        data=cursor.fetchone()
-        if data==None:
-            cursor.execute(f"INSERT INTO blocked_vc VALUES({content.guild.id}, {voice.id})")
-            mycon.commit()
-            await content.response.send_message(content=f"No Drags will be given to {voice.mention}.")
-        else:
-            await content.response.send_message(content=f"{voice.mention} is already blocked for drags.")
-    else:
-        await content.response.send_message(content=f"Bot shutdown by Mod. Please turn on first.") 
-
-@denydrags.error
-async def on_denydrags_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
-    if isinstance(error, discord.app_commands.MissingPermissions):
-        await interaction.response.send_message(str(error), ephemeral=True)
-
+discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GSc0XD.fzVtiAslJPTTWdqKECJzdGS7s-Wr0QfmTgq03s"
 
 @client.tree.command(name="buschhousing", description="Step 1: Enter On-campus Housing Location")
 @discord.app_commands.choices(bhousing=
@@ -121,8 +78,8 @@ async def on_denydrags_error(interaction: discord.Interaction, error: discord.ap
                                discord.app_commands.Choice(name="Winkler Suites", value="B17"),
                                ])
 async def buschhousing(content: discord.Interaction, bhousing:discord.app_commands.Choice[str]):
-   await content.response.send_message(content=f"{bhousing.name},{bhousing.value}")
-
+   #await content.response.send_message(content=f"{bhousing.name},{bhousing.value}")
+   await content.user.send("HI")
 @client.tree.command(name="collegeavehousing", description="Step 1: Enter On-campus Housing Location")
 @discord.app_commands.choices(chousing=
                               [discord.app_commands.Choice(name="Brett Hall", value="C1"),
@@ -203,6 +160,49 @@ async def buschclass(content: discord.Interaction, buschclasslocation:discord.ap
                                ])
 async def liviclass(content: discord.Interaction, liviclasslocation:discord.app_commands.Choice[str], starttime:str, endtime:str):
    await content.response.send_message(content=f"{liviclasslocation.name},{liviclasslocation.value}")
+
+@client.tree.command(name="collegeaveclass", description="Step 2: Enter Class Location and Timings")
+@discord.app_commands.choices(collegeaveclasslocation=
+                                [discord.app_commands.Choice(name="(AB) Rutgers Academic Building", value="1C"),
+                                discord.app_commands.Choice(name="(BH) Bishop House", value="2C"),
+                                discord.app_commands.Choice(name="(CA) Campbell Hall", value="3C"),
+                                discord.app_commands.Choice(name="(CI) School of Communication and Information", value="4C"),
+                                discord.app_commands.Choice(name="(ED) Graduate School of Education", value="5C"),
+                                discord.app_commands.Choice(name="(FH) Frelinghuysen Hall", value="6C"),
+                                discord.app_commands.Choice(name="(HC) Honors College", value="7C"),
+                                discord.app_commands.Choice(name="(HH) Hardenbergh Hall", value="8C"),
+                                discord.app_commands.Choice(name="(MI) Milledoler Hall", value="9C"),
+                                discord.app_commands.Choice(name="(MU) Murray Hall", value="10C"),
+                                discord.app_commands.Choice(name="(SC) Scott Hall", value="11C"),
+                                discord.app_commands.Choice(name="(VD) Van Dyck Hall", value="12C"),
+                                discord.app_commands.Choice(name="(VH) Voorhees Hall", value="13C"),
+                                discord.app_commands.Choice(name="(ZAM) Zimmerli Art Museum", value="14C"),
+                                ])
+async def collegeaveclass(content: discord.Interaction, collegeaveclasslocation:discord.app_commands.Choice[str], starttime:str, endtime:str):
+    await content.response.send_message(content=f"{collegeaveclasslocation.name},{collegeaveclasslocation.value},{starttime},{endtime}")
+
+
+@client.tree.command(name="cookdougclass", description="Step 2: Enter Class Location and Timings")
+@discord.app_commands.choices(cookdougclasslocation=
+                            [discord.app_commands.Choice(name="(ARH) Art History Hall", value="1D"),
+                            discord.app_commands.Choice(name="(BIO) Biological Sciences", value="2D"),
+                            discord.app_commands.Choice(name="(BL) Blake Hall", value="3D"),
+                            discord.app_commands.Choice(name="(BT) Bartlett Hall", value="4D"),
+                            discord.app_commands.Choice(name="(CDL) Cook Douglass Lecture Hall", value="5D"),
+                            discord.app_commands.Choice(name="(DAV) Davison Hall", value="6D"),
+                            discord.app_commands.Choice(name="(FNH) Institute for Food Nutrition & Health", value="7D"),
+                            discord.app_commands.Choice(name="(FOR) Foran Hall", value="8D"),
+                            discord.app_commands.Choice(name="(FS) Food Science Building", value="9D"),
+                            discord.app_commands.Choice(name="(HCK) Hickman Hall", value="10D"),
+                            discord.app_commands.Choice(name="(HSB) Heldrich Science Building", value="11D"),
+                            discord.app_commands.Choice(name="(LOR) Loree Classroom Building", value="12D"),
+                            discord.app_commands.Choice(name="(KLG) Kathleen W Ludwig Global Village Learning Center", value="13D"),
+                            discord.app_commands.Choice(name="(RAB) Ruth Adams Building", value="14D"),
+                            discord.app_commands.Choice(name="(TH) Thompson Hall", value="15D"),
+                            discord.app_commands.Choice(name="(WAL) Waller Hall", value="16D"),
+                            ])
+async def cookdougclass(content: discord.Interaction, cookdougclasslocation:discord.app_commands.Choice[str], starttime:str, endtime:str):
+    await content.response.send_message(content=f"{cookdougclasslocation.name},{cookdougclasslocation.value},{starttime},{endtime}")
 
 
 client.run(discordtoken)
