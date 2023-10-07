@@ -55,7 +55,6 @@ async def on_ready():
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/dragme"))
   await client.tree.sync()
 
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GSc0XD.fzVtiAslJPTTWdqKECJzdGS7s-Wr0QfmTgq03s"
 
 @client.tree.command(name="buschhousing", description="Step 1: Enter On-campus Housing Location")
 @discord.app_commands.choices(bhousing=
