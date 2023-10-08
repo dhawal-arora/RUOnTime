@@ -1,13 +1,14 @@
-from os import sched_setscheduler
+import datetime
 import mysql.connector as sqltor
 import data
 import math
 
-mycon=sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
+mycon = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="RUOnTime#15", database="customer_586593_ruontime")
 if mycon.is_connected():
-    print("Succesfully connected to sql")
+    print("Successfully connected to SQL")
 cursor = mycon.cursor()
 
+# Define dorms and buildings as you did in your code
 dorms = {
         "Allen Hall": [40.524590, -74.461220],
         "Barr Hall": [40.5220529,-74.4562879],
@@ -109,61 +110,112 @@ buildings = {
         "(WAL) Waller Hall": [40.4832717,-74.4405034],
     }
 
+# Fetch train and station data
 trains = data.getTrain()
 stations = data.getStaton()
-schedule = dict()
-busStops = dict()
 
+# Create a dictionary to store the simplified station information
 simpleStation = {}
-
-for key, val in stations.items(): 
+for key, val in stations.items():
     name = val.get('stationName')
     lat = val.get("lat")
     lon = val.get("lon")
     simpleStation[name] = [lat, lon]
 
-print(simpleStation)
-print()
+# Create the simpleBus dictionary
+simpleBus = {}
 
+# Iterate through the train data to populate simpleBus
+for train_id, train_info in trains.items():
+    predictions = train_info.get("predictions")
+    for prediction in predictions:
+        station_name = prediction.get("stationName")
+        eta = prediction.get("actualETA") / 1000
+        date_time_eta = datetime.datetime.utcfromtimestamp(eta)
+        load = train_info.get("extra").get("load")
+        cap = train_info.get("extra").get("cap")
+        percentage = (load // cap) * 100
 
-def compute(id):
-    cursor.execute("SELECT dorm FROM housing WHERE id=(%s)", (id,))
-    res = cursor.fetchall()
-    dorm = None
-    for i in res:
-        dorm = i[0]
-        schedule[dorm] = dorms[i[0]]
+        if station_name not in simpleBus:
+            simpleBus[station_name] = []
 
-    cursor.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) ORDER BY id", (id,))
-    res = cursor.fetchall()
+        simpleBus[station_name].append({"ETA": date_time_eta, "Load Percentage": percentage})
 
-    for i in res: 
-        schedule[i[0]] = buildings[i[0]]
+# Define a function to calculate the closest bus stop to a location
+def find_closest_bus_stop(location):
+    min_distance = float('inf')
+    closest_stop = None
 
-    print(schedule)
-    print()
+    for stop, coordinates in simpleStation.items():
+        distance = math.sqrt((location[0] - coordinates[0]) ** 2 + (location[1] - coordinates[1]) ** 2)
+        if distance < min_distance:
+            min_distance = distance
+            closest_stop = stop
 
-    actualDistance = []
-    for key, val in schedule.items():
-        distance = []
-        for k, v in simpleStation.items():
-            d = math.sqrt( math.pow( val[0] - v[0], 2 ) + math.pow( val[1] - v[1], 2 ) )
-            da = [d, k]
-            distance.append(da)
+    return closest_stop
 
-        print(distance)
+# Define a function to check if you'll be late for classes
+def check_class_timings(class_id, day):
+    result = {}
+    cursor.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
+    dorm_result = cursor.fetchone()
 
+    if dorm_result is not None:
+        dorm = dorm_result[0]
+        schedule = {dorm: dorms[dorm]}
+    else:
+        result["error"] = "Dorm information not found for class ID"
+        return result
 
+    cursor.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) AND day=(%s) ORDER BY id", (class_id, day))
+    class_results = cursor.fetchall()
 
+    class_info_list = []
 
-
-
-
-
-
-
+    for class_info in class_results:
+        location = class_info[0]
+        start_time = class_info[1]
+        end_time = class_info[2]
         
-    
-    
+        closest_bus_stop = find_closest_bus_stop(buildings[location])
+        
+        class_info_dict = {
+            "Location": location,
+            "Day": day,
+            "Start Time": start_time,
+            "End Time": end_time,
+            "Closest Bus Stop": closest_bus_stop
+        }
 
-compute(101)
+        if closest_bus_stop is not None:
+            # Now, you can check the bus timings for the closest bus stop from simpleBus
+            if closest_bus_stop in simpleBus:
+                bus_timings = simpleBus[closest_bus_stop]
+                bus_info_list = []
+
+                for i, timing in enumerate(bus_timings):
+                    bus_info = {
+                        "Bus Number": i + 1,
+                        "ETA": timing['ETA'].strftime("%Y-%m-%d %H:%M:%S"),
+                        "Load Percentage": timing['Load Percentage']
+                    }
+                    bus_info_list.append(bus_info)
+
+                class_info_dict["Bus Timings"] = bus_info_list
+            else:
+                class_info_dict["Bus Timings"] = "Bus timings not available for the closest bus stop."
+
+        class_info_list.append(class_info_dict)
+
+    result["classes"] = class_info_list
+    return result
+
+# Call the check_class_timings function for a specific class and day
+class_id = 102
+day = "Thursday"
+result = check_class_timings(class_id, day)
+print(result)  # For testing, you can print the result, but you can return it to an external user as needed
+
+# Close the MySQL connection
+mycon.close()
+
