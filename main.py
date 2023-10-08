@@ -50,7 +50,7 @@ CREATE TABLE votekick (
 ALTER TABLE votekick 
 ADD initialize varchar(1);
 '''
-from typing import Any
+from typing import Any, final
 import os
 import discord
 from discord.ext import commands
