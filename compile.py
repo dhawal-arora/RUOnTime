@@ -3,10 +3,6 @@ import mysql.connector as sqltor
 import data
 import math
 
-mycon = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="RUOnTime#15", database="customer_586593_ruontime")
-if mycon.is_connected():
-    print("Successfully connected to SQL")
-cursor = mycon.cursor()
 
 # Define dorms and buildings as you did in your code
 dorms = {
@@ -154,11 +150,14 @@ def find_closest_bus_stop(location):
 
     return closest_stop
 
+
 # Define a function to check if you'll be late for classes
 def check_class_timings(class_id, day):
+    connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
+    cur = connector.cursor()
     result = {}
-    cursor.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
-    dorm_result = cursor.fetchone()
+    cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
+    dorm_result = cur.fetchone()
 
     if dorm_result is not None:
         dorm = dorm_result[0]
@@ -167,8 +166,8 @@ def check_class_timings(class_id, day):
         result["error"] = "Dorm information not found for class ID"
         return result
 
-    cursor.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) AND day=(%s) ORDER BY id", (class_id, day))
-    class_results = cursor.fetchall()
+    cur.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) AND day=(%s) ORDER BY id", (class_id, day))
+    class_results = cur.fetchall()
 
     class_info_list = []
 
@@ -208,14 +207,14 @@ def check_class_timings(class_id, day):
         class_info_list.append(class_info_dict)
 
     result["classes"] = class_info_list
+    connector.close()
     return result
 
 # Call the check_class_timings function for a specific class and day
 class_id = 102
 day = "Thursday"
-result = check_class_timings(class_id, day)
-print(result)  # For testing, you can print the result, but you can return it to an external user as needed
+result = check_class_timings(class_id, day) # For testing, you can print the result, but you can return it to an external user as needed
 
 # Close the MySQL connection
-mycon.close()
+
 

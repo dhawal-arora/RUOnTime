@@ -43,6 +43,6 @@ def getStaton():
     return stations
 
 # print(getTrain())
-print()
-print(getStaton())
+#print()
+#print(getStaton())
 
