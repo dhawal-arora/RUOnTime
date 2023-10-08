@@ -81,7 +81,7 @@ async def on_ready():
 
 @client.tree.command(name="help", description="Help command.")
 async def help(content: discord.Interaction):
-    myEmbed = discord.Embed(title="RU On Time", description="I help save your time...\n\n**Step 1. Enter On-Campus Housing Details**\n</buschhousing:1160279628703862784>: Choose if staying on Busch.\n</livihousing:1160291767032221708>: Choose if staying on Livingston.\n</collegeavehousing:1160291767032221706>: Choose if staying on College Avenue.\n</cookdoughousing:1160291767032221707>: Choose if staying on Cook-Douglass.\n\n**Step 2. Enter Class Schedule**\n</buschclass:1160304171770196011>: Enter Busch Class.\n</liviclass:1160323302645043352>: Enter Livingston Class.\n</collegeaveclass:1160323302645043353>: Enter College Ave Class.\n</cookdougclass:1160323302645043354>: Enter Cook-Douglass class.\n\n**Extra Commands:**\n </openschedule:1160456245887635527>: To denote you will add classes.\n</closeschedule:1160360343437058190>: To denote you are done entering schedule.\n</deletehousing:1160449357141790752>: Delete stored housing info completely.\n</deleteschedule:1160449357141790751>: Delete stored schedule completely.", color=0x00ff00)
+    myEmbed = discord.Embed(title="RU On Time", description="I help save your time...\n\n**Step 1. Enter On-Campus Housing Details**\n</buschhousing:1160279628703862784>: Choose if staying on Busch.\n</livihousing:1160291767032221708>: Choose if staying on Livingston.\n</collegeavehousing:1160291767032221706>: Choose if staying on College Avenue.\n</cookdoughousing:1160291767032221707>: Choose if staying on Cook-Douglass.\n\n**Step 2. Enter Class Schedule After /openschedule**\n</buschclass:1160304171770196011>: Enter Busch Class.\n</liviclass:1160323302645043352>: Enter Livingston Class.\n</collegeaveclass:1160323302645043353>: Enter College Ave Class.\n</cookdougclass:1160323302645043354>: Enter Cook-Douglass class.\n\n**Step 3: Use /closeschedule To Submit Final Class List **\n\n**Step 4. Use /busreport for Generated Report**\n\n**Extra Commands:**\n </openschedule:1160456245887635527>: To denote you will add classes.\n</closeschedule:1160360343437058190>: To denote you are done entering schedule.\n</deletehousing:1160449357141790752>: Delete stored housing info completely.\n</deleteschedule:1160449357141790751>: Delete stored schedule completely.", color=0x00ff00)
     #buttons=Empty()
     #support(buttons)
     #await content.response.send_message(embed=myEmbed, view=buttons)
@@ -114,7 +114,7 @@ class MyCog(commands.Cog):
         print("My task is running!")          
 
 '''
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GjrFIq.QDbFYPhKTyC15Trv2ud_n5qfjGY4AtnA09paG4"
+discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GNxc25.IxiNXrv_ueKCnMXKDAe88jF1DaAw5mvgDrqeMY"
 #----------------HOUSING--------------------------------------------
 
 @client.tree.command(name="buschhousing", description="Step 1: Enter On-campus Housing Location")
@@ -289,20 +289,20 @@ async def busreport(content: discord.Interaction):
     a = ""
     classes = finaldata.get("classes", [])
     for class_info in classes: 
-        a+="Class Location:"+str({class_info["Location"]})+"\n"
-        a+="Class Day:"+str(class_info["Day"])+"\n"
-        a+="Class Start Time:"+str(class_info["Start Time"])+"\n"
-        a+="Closest Bus Stop:"+str(class_info["Closest Bus Stop"])+"\n"
+        a+="**Class Location:** "+str({class_info["Location"]})+"\n"
+        a+="**Class Day:** "+str(class_info["Day"])+"\n"
+        a+="**Class Start Time:** "+str(class_info["Start Time"])+"\n"
+        a+="**Closest Bus Stop:** "+str(class_info["Closest Bus Stop"])+"\n\n"
 
         if "Bus Timings" in class_info:
             for bus_info in class_info["Bus Timings"]:
-                a+="Bus Number"+str(bus_info["Bus Number"])
-                a+="is arriving at your stop in "+str(bus_info["ETA"])+".\n"
-                a+="It is "+str(bus_info["Load Percentage"])+"full"
-                a+="Status"+str(bus_info.get("Status", "N/A"))+"/n"
+                a+=str(bus_info["Bus Number"])
+                a+=" is arriving at your stop in "+str(bus_info["ETA"])+".\n"
+                a+="It is "+str(bus_info["Load Percentage"])+"%"+" full\n"
+                a+="**Status:** "+str(bus_info.get("Status", "N/A"))+"\n\n"
 
         if "Estimated Arrival" in class_info:
-            a+="You will arrive to class at "+str(class_info["Estimated Arrival"])
+            a+="You will arrive to class at "+str(class_info["Estimated Arrival"])+"\n\n"
 
 
     myEmbed = discord.Embed(title="RU On Time", description=f"{a}", color=0x00ff00)
