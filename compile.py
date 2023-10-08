@@ -124,18 +124,20 @@ simpleBus = {}
 # Iterate through the train data to populate simpleBus
 for train_id, train_info in trains.items():
     predictions = train_info.get("predictions")
+    train_name = train_info.get("line")
     for prediction in predictions:
         station_name = prediction.get("stationName")
         eta = prediction.get("actualETA") / 1000
         date_time_eta = datetime.datetime.utcfromtimestamp(eta)
         load = train_info.get("extra").get("load")
         cap = train_info.get("extra").get("cap")
-        percentage = (load // cap) * 100
+        percentage = (load / cap) * 100
+        percentage= math.ceil(percentage)
 
         if station_name not in simpleBus:
             simpleBus[station_name] = []
 
-        simpleBus[station_name].append({"ETA": date_time_eta, "Load Percentage": percentage})
+        simpleBus[station_name].append({"ETA": date_time_eta, "Load Percentage": percentage, "Bus Number": train_name})
 
 # Define a function to calculate the closest bus stop to a location
 def find_closest_bus_stop(location):
@@ -247,6 +249,7 @@ def check_class_timings(class_id, day):
         end_time = class_info[2]
 
         closest_bus_stop = find_closest_bus_stop(buildings[location])
+
 
         class_info_dict = {
             "Location": location,
