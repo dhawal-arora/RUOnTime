@@ -153,7 +153,7 @@ def find_closest_bus_stop(location):
 
 # Define a function to check if you'll be late for classes
 def check_class_timings(class_id, day):
-    connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
+    connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="",database="customer_586593_ruontime")
     cur = connector.cursor()
     result = {}
     cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
@@ -214,7 +214,7 @@ def check_class_timings(class_id, day):
 class_id = 102
 day = "Thursday"
 result = check_class_timings(class_id, day) # For testing, you can print the result, but you can return it to an external user as needed
+print(result)
 
 # Close the MySQL connection
-
 

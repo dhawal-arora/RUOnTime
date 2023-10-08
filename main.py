@@ -1,5 +1,5 @@
 import mysql.connector as sqltor
-mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
+mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="",database="customer_586593_ruontime")
 if mycon.is_connected():
     print('Succesfully Connected to MySql')
 cursor=mycon.cursor()
@@ -55,7 +55,7 @@ CREATE TABLE votekick (
 ALTER TABLE votekick 
 ADD initialize varchar(1);
 '''
-from typing import Any
+from typing import Any, final
 import os
 import discord
 from discord.ext import commands
@@ -78,7 +78,6 @@ async def on_ready():
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/busreport"))
   await client.tree.sync()
 
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.G1NYj8.-RbmJfLVprDXdl2KhY94dJ7S9QYjq6MKNOjTF8"
 
 @client.tree.command(name="help", description="Help command.")
 async def help(content: discord.Interaction):
@@ -264,7 +263,39 @@ async def busreport(content: discord.Interaction):
     dayweek=dt.strftime('%A')
     finaldata=compile.check_class_timings(content.user.id,dayweek)
 
+    # print(finaldata)
+    # classes = finaldata.get("classes", [])
+    # print("schedule")
+    # for class_info in classes:
+    #     print("Location:", class_info["Location"])
+    #     print("Day:", class_info["Day"])
+    #     print("Start Time:", class_info["Start Time"])
+    #     print("End Time:", class_info["End Time"])
+    #     print("Closest Bus Stop:", class_info["Closest Bus Stop"])
+    #
+    #     if "Bus Timings" in class_info:
+    #         print("Bus Timings:")
+    #         for bus_info in class_info["Bus Timings"]:
+    #             print("  Bus Number:", bus_info["Bus Number"])
+    #             print("  ETA:", bus_info["ETA"])
+    #             print("  Load Percentage:", bus_info["Load Percentage"])
+    #             print("  Status:", bus_info.get("Status", "N/A"))
+    #             print()
 
+    a = ""
+    classes = finaldata.get("classes", [])
+    for class_info in classes: 
+        a+=class_info["Location"]
+        a+=class_info["Day"]
+        a+=class_info["Start Time"]
+        a+=class_info["Closest Bus Stop"]
+
+        if "Bus Timings" in class_info:
+            for bus_info in class_info["Bus Timings"]:
+                a+=bus_info["Bus Number"]
+                a+=bus_info["ETA"]
+                a+=bus_info["Load Percentage"]
+                a+=bus_info.get("Status", "N/A")
 
 
 
