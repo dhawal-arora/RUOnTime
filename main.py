@@ -1,5 +1,10 @@
-
+import mysql.connector as sqltor
+mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="",database="customer_586593_ruontime")
+if mycon.is_connected():
+    print('Succesfully Connected to MySql')
+cursor=mycon.cursor()
 #cursor.execute("ALTER TABLE classes ADD COLUMN day varchar (15);")
+
 def housingentry(content,dorm):
     cursor.execute(f"SELECT * FROM housing WHERE id={content.user.id}")
     data=cursor.fetchone()
@@ -258,7 +263,39 @@ async def busreport(content: discord.Interaction):
     dayweek=dt.strftime('%A')
     finaldata=compile.check_class_timings(content.user.id,dayweek)
 
+    # print(finaldata)
+    # classes = finaldata.get("classes", [])
+    # print("schedule")
+    # for class_info in classes:
+    #     print("Location:", class_info["Location"])
+    #     print("Day:", class_info["Day"])
+    #     print("Start Time:", class_info["Start Time"])
+    #     print("End Time:", class_info["End Time"])
+    #     print("Closest Bus Stop:", class_info["Closest Bus Stop"])
+    #
+    #     if "Bus Timings" in class_info:
+    #         print("Bus Timings:")
+    #         for bus_info in class_info["Bus Timings"]:
+    #             print("  Bus Number:", bus_info["Bus Number"])
+    #             print("  ETA:", bus_info["ETA"])
+    #             print("  Load Percentage:", bus_info["Load Percentage"])
+    #             print("  Status:", bus_info.get("Status", "N/A"))
+    #             print()
 
+    a = ""
+    classes = finaldata.get("classes", [])
+    for class_info in classes: 
+        a+=class_info["Location"]
+        a+=class_info["Day"]
+        a+=class_info["Start Time"]
+        a+=class_info["Closest Bus Stop"]
+
+        if "Bus Timings" in class_info:
+            for bus_info in class_info["Bus Timings"]:
+                a+=bus_info["Bus Number"]
+                a+=bus_info["ETA"]
+                a+=bus_info["Load Percentage"]
+                a+=bus_info.get("Status", "N/A")
 
 
 
@@ -756,3 +793,5 @@ async def cookdougclass(content: discord.Interaction, location:discord.app_comma
             await content.response.send_message(content="Start time after end time. Please Try Again.", ephemeral=True)
 
 client.run(discordtoken)
+
+
