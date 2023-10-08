@@ -114,6 +114,7 @@ class MyCog(commands.Cog):
         print("My task is running!")          
 
 '''
+discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GjrFIq.QDbFYPhKTyC15Trv2ud_n5qfjGY4AtnA09paG4"
 #----------------HOUSING--------------------------------------------
 
 @client.tree.command(name="buschhousing", description="Step 1: Enter On-campus Housing Location")
@@ -288,26 +289,23 @@ async def busreport(content: discord.Interaction):
     a = ""
     classes = finaldata.get("classes", [])
     for class_info in classes: 
-        print()
-        a+=class_info["Location"]
-        a+=class_info["Day"]
-        a+=class_info["Start Time"]
-        a+=class_info["Closest Bus Stop"]
+        a+="Class Location:"+str({class_info["Location"]})+"\n"
+        a+="Class Day:"+str(class_info["Day"])+"\n"
+        a+="Class Start Time:"+str(class_info["Start Time"])+"\n"
+        a+="Closest Bus Stop:"+str(class_info["Closest Bus Stop"])+"\n"
 
         if "Bus Timings" in class_info:
             for bus_info in class_info["Bus Timings"]:
-                a+=bus_info["Bus Number"]
-                a+=bus_info["ETA"]
-                a+=bus_info["Load Percentage"]
-                a+=bus_info.get("Status", "N/A")
+                a+="Bus Number"+str(bus_info["Bus Number"])
+                a+="is arriving at your stop in "+str(bus_info["ETA"])+".\n"
+                a+="It is "+str(bus_info["Load Percentage"])+"full"
+                a+="Status"+str(bus_info.get("Status", "N/A"))+"/n"
 
         if "Estimated Arrival" in class_info:
-            a+=class_info["Estimated Arrival"]
-
-        print(a)
+            a+="You will arrive to class at "+str(class_info["Estimated Arrival"])
 
 
-    myEmbed = discord.Embed(title="RU On Time", description="", color=0x00ff00)
+    myEmbed = discord.Embed(title="RU On Time", description=f"{a}", color=0x00ff00)
     #buttons=Empty()
     #support(buttons)
     #await content.response.send_message(embed=myEmbed, view=buttons)
