@@ -1,5 +1,5 @@
 import mysql.connector as sqltor
-mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="",database="customer_586593_ruontime")
+mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND",database="customer_586593_ruontime")
 if mycon.is_connected():
     print('Succesfully Connected to MySql')
 cursor=mycon.cursor()
@@ -303,6 +303,8 @@ async def busreport(content: discord.Interaction):
 
         if "Estimated Arrival" in class_info:
             a+=class_info["Estimated Arrival"]
+
+        print(a)
 
 
     myEmbed = discord.Embed(title="RU On Time", description="", color=0x00ff00)

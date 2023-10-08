@@ -220,7 +220,7 @@ def calculate_estimated_arrival(bus_timings, current_time):
 
 # Define a function to check if you'll be late for classes
 def check_class_timings(class_id, day):
-    connector = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="", database="customer_586593_ruontime")
+    connector = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND", database="customer_586593_ruontime")
     cur = connector.cursor()
     result = {}
     
