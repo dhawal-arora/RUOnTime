@@ -1,10 +1,5 @@
-import mysql.connector as sqltor
-mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
-if mycon.is_connected():
-    print('Succesfully Connected to MySql')
-cursor=mycon.cursor()
-#cursor.execute("ALTER TABLE classes ADD COLUMN day varchar (15);")
 
+#cursor.execute("ALTER TABLE classes ADD COLUMN day varchar (15);")
 def housingentry(content,dorm):
     cursor.execute(f"SELECT * FROM housing WHERE id={content.user.id}")
     data=cursor.fetchone()
@@ -78,7 +73,6 @@ async def on_ready():
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/busreport"))
   await client.tree.sync()
 
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.G1NYj8.-RbmJfLVprDXdl2KhY94dJ7S9QYjq6MKNOjTF8"
 
 @client.tree.command(name="help", description="Help command.")
 async def help(content: discord.Interaction):
