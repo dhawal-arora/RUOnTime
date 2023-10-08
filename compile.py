@@ -1,7 +1,14 @@
+from os import sched_setscheduler
+import mysql.connector as sqltor
 import data
+import math
+
+mycon=sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="RUOnTime#15",database="customer_586593_ruontime")
+if mycon.is_connected():
+    print("Succesfully connected to sql")
+cursor = mycon.cursor()
 
 dorms = {
-
         "Allen Hall": [40.524590, -74.461220],
         "Barr Hall": [40.5220529,-74.4562879],
         "BEST Hall": [40.5222929,-74.4571605],
@@ -55,53 +62,108 @@ dorms = {
 
 buildings = {
 
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-        "": [],
-
+        "(ARC) Allison Road Classroom": [40.5238717,-74.4676495],
+        "(BME) Biomedical Engineering Building": [40.5244354,-74.4631845],
+        "(BST) BEST West Residence Hall": [40.5222995,-74.4571924],
+        "(CCB) Chemistry & Chemical Biology": [40.5245481,-74.4647658],
+        "(CoRE) Computing Research & Education Building": [40.521315,-74.4639909],
+        "(EN) Engineering Building": [40.5225221,-74.4636459],
+        "(HLL) Hill Center": [40.5220967,-74.4652776],
+        "(PH) Pharmacy Building (William Levin Hall)": [40.523526,-74.4702237],
+        "(PHY) Physics Building": [40.522433,-74.4660233],
+        "(RWH) Richard Weeks Hall of Engineering": [40.5245398,-74.4622151],
+        "(SEC) Science & Engineering Resource Center (T. Alexander Pond)": [40.5227426,-74.4652637],
+        "(WL) Wright Rieman Laboratories": [40.5238024,-74.4651848],
+        "(BE) Beck Hall": [40.5228057,-74.4420143],
+        "(LSH) Lucy Stone Hall": [40.5219613,-74.4374646],
+        "(LSH-AUD) Lucy Stone Hall Auditorium": [40.5219613,-74.4374646],
+        "(RC) Rutgers Cinema": [40.5253919,-74.4400542],
+        "(TIL) Tillett Hall": [40.5218973,-74.43857],
+        "(AB) Rutgers Academic Building": [40.5016988,-74.4506972],
+        "(BH) Bishop House": [40.5030575,-74.4523535],
+        "(CA) Campbell Hall": [40.505478,-74.4537233],
+        "(CI) School of Communication and Information": [40.5053025,-74.4557983],
+        "(ED) Graduate School of Education": [40.5013173,-74.4488688],
+        "(FH) Frelinghuysen Hall": [40.5039639,-74.4510017],
+        "(HC) Honors College": [40.5025532,-74.4496017],
+        "(MI) Milledoler Hall": [40.5010299,-74.4496016],
+        "(MU) Murray Hall": [40.5006293,-74.4491858],
+        "(SC) Scott Hall": [40.4998392,-74.4500895],
+        "(VD) Van Dyck Hall": [40.5006899,-74.4505175],
+        "(VH) Voorhees Hall": [40.2158352,-74.5494572],
+        "(ZAM) Zimmerli Art Museum": [40.4997573,-74.44842],
+        "(ARH) Art History Hall": [40.486212,-74.4377133],
+        "(BIO) Biological Sciences": [40.4878269,-74.4401368],
+        "(BL) Blake Hall": [40.4819845,-74.4420774],
+        "(CDL) Cook Douglass Lecture Hall": [40.4800552,-74.4387149],
+        "(DAV) Davison Hall": [40.4842052,-74.440007],
+        "(FNH) Institude for Food Nutrition & Health": [40.4795689,-74.437532],
+        "(FOR) Foran Hall": [40.4805702,-74.4378852],
+        "(FS) Food Science Building": [40.4792277,-74.4387391],
+        "(HCK) Hickman Hall": [40.4847718,-74.4367396],
+        "(HSB) Heldrich Science Building": [40.4868104,-74.4409848],
+        "(LOR) Loree Classroom Building": [40.4828318,-74.4379258],
+        "(KLG) Kathleen W Ludwing Global Village Learning Center": [40.4841546,-74.4415872],
+        "(RAB) Ruth Adams Building": [40.4874218,-74.4399623],
+        "(TH) Thompson Hall": [40.481481,-74.4423702],
+        "(WAL) Waller Hall": [40.4832717,-74.4405034],
     }
+
+trains = data.getTrain()
+stations = data.getStaton()
+schedule = dict()
+busStops = dict()
+
+simpleStation = {}
+
+for key, val in stations.items(): 
+    name = val.get('stationName')
+    lat = val.get("lat")
+    lon = val.get("lon")
+    simpleStation[name] = [lat, lon]
+
+print(simpleStation)
+print()
+
+
+def compute(id):
+    cursor.execute("SELECT dorm FROM housing WHERE id=(%s)", (id,))
+    res = cursor.fetchall()
+    dorm = None
+    for i in res:
+        dorm = i[0]
+        schedule[dorm] = dorms[i[0]]
+
+    cursor.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) ORDER BY id", (id,))
+    res = cursor.fetchall()
+
+    for i in res: 
+        schedule[i[0]] = buildings[i[0]]
+
+    print(schedule)
+    print()
+
+    actualDistance = []
+    for key, val in schedule.items():
+        distance = []
+        for k, v in simpleStation.items():
+            d = math.sqrt( math.pow( val[0] - v[0], 2 ) + math.pow( val[1] - v[1], 2 ) )
+            da = [d, k]
+            distance.append(da)
+
+        print(distance)
+
+
+
+
+
+
+
+
+
+
+        
+    
+    
+
+compute(101)
