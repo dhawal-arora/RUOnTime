@@ -266,9 +266,11 @@ def check_class_timings(class_id, day):
                 current_time = datetime.datetime.now()
                 estimated_arrival = calculate_estimated_arrival(bus_timings, current_time)
 
+                class_info_dict["Bus Timings"] = bus_timings
+
                 if estimated_arrival is not None:
                     class_info_dict["Estimated Arrival"] = estimated_arrival.strftime("%Y-%m-%d %H:%M:%S")
-                    if (estimated_arrival - start_time)==0:
+                    if estimated_arrival - start_time == 0:
                         class_info_dict["Status"] = "On Time"
                     else:
                         class_info_dict["Status"] = "Late"
