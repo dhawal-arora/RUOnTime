@@ -151,11 +151,80 @@ def find_closest_bus_stop(location):
     return closest_stop
 
 
+# # Define a function to check if you'll be late for classes
+# def check_class_timings(class_id, day):
+#     connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND",database="customer_586593_ruontime")
+#     cur = connector.cursor()
+#     result = {}
+#     cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
+#     dorm_result = cur.fetchone()
+#
+#     if dorm_result is not None:
+#         dorm = dorm_result[0]
+#         schedule = {dorm: dorms[dorm]}
+#     else:
+#         result["error"] = "Dorm information not found for class ID"
+#         return result
+#
+#     cur.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) AND day=(%s) ORDER BY id", (class_id, day))
+#     class_results = cur.fetchall()
+#
+#     class_info_list = []
+#
+#     for class_info in class_results:
+#         location = class_info[0]
+#         start_time = class_info[1]
+#         end_time = class_info[2]
+#         
+#         closest_bus_stop = find_closest_bus_stop(buildings[location])
+#         
+#         class_info_dict = {
+#             "Location": location,
+#             "Day": day,
+#             "Start Time": start_time,
+#             "End Time": end_time,
+#             "Closest Bus Stop": closest_bus_stop
+#         }
+#
+#         if closest_bus_stop is not None:
+#             # Now, you can check the bus timings for the closest bus stop from simpleBus
+#             if closest_bus_stop in simpleBus:
+#                 bus_timings = simpleBus[closest_bus_stop]
+#                 bus_info_list = []
+#
+#                 for i, timing in enumerate(bus_timings):
+#                     bus_info = {
+#                         "Bus Number": i + 1,
+#                         "ETA": timing['ETA'].strftime("%Y-%m-%d %H:%M:%S"),
+#                         "Load Percentage": timing['Load Percentage']
+#                     }
+#                     bus_info_list.append(bus_info)
+#
+#                 class_info_dict["Bus Timings"] = bus_info_list
+#             else:
+#                 class_info_dict["Bus Timings"] = "Bus timings not available for the closest bus stop."
+#
+#         class_info_list.append(class_info_dict)
+#
+#     result["classes"] = class_info_list
+#     connector.close()
+#     return result
+
+# Define a function to calculate estimated arrival time
+def calculate_estimated_arrival(bus_timings, current_time):
+    for timing in bus_timings:
+        bus_eta = timing['ETA']
+        if bus_eta > current_time:
+            return bus_eta
+    return None
+
 # Define a function to check if you'll be late for classes
 def check_class_timings(class_id, day):
-    connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="",database="customer_586593_ruontime")
+    connector = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="", database="customer_586593_ruontime")
     cur = connector.cursor()
     result = {}
+    
+    # Fetch dorm information
     cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
     dorm_result = cur.fetchone()
 
@@ -166,6 +235,7 @@ def check_class_timings(class_id, day):
         result["error"] = "Dorm information not found for class ID"
         return result
 
+    # Fetch class information
     cur.execute("SELECT location, starttime, endtime FROM classes WHERE id=(%s) AND day=(%s) ORDER BY id", (class_id, day))
     class_results = cur.fetchall()
 
@@ -175,9 +245,9 @@ def check_class_timings(class_id, day):
         location = class_info[0]
         start_time = class_info[1]
         end_time = class_info[2]
-        
+
         closest_bus_stop = find_closest_bus_stop(buildings[location])
-        
+
         class_info_dict = {
             "Location": location,
             "Day": day,
@@ -192,17 +262,22 @@ def check_class_timings(class_id, day):
                 bus_timings = simpleBus[closest_bus_stop]
                 bus_info_list = []
 
-                for i, timing in enumerate(bus_timings):
-                    bus_info = {
-                        "Bus Number": i + 1,
-                        "ETA": timing['ETA'].strftime("%Y-%m-%d %H:%M:%S"),
-                        "Load Percentage": timing['Load Percentage']
-                    }
-                    bus_info_list.append(bus_info)
+                # Calculate estimated arrival time
+                current_time = datetime.datetime.now()
+                estimated_arrival = calculate_estimated_arrival(bus_timings, current_time)
 
-                class_info_dict["Bus Timings"] = bus_info_list
+                if estimated_arrival is not None:
+                    class_info_dict["Estimated Arrival"] = estimated_arrival.strftime("%Y-%m-%d %H:%M:%S")
+                    if estimated_arrival <= start_time:
+                        class_info_dict["Status"] = "On Time"
+                    else:
+                        class_info_dict["Status"] = "Late"
+                else:
+                    class_info_dict["Status"] = "No available bus before class"
+
             else:
                 class_info_dict["Bus Timings"] = "Bus timings not available for the closest bus stop."
+                class_info_dict["Status"] = "N/A"
 
         class_info_list.append(class_info_dict)
 

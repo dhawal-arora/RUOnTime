@@ -281,10 +281,14 @@ async def busreport(content: discord.Interaction):
     #             print("  Load Percentage:", bus_info["Load Percentage"])
     #             print("  Status:", bus_info.get("Status", "N/A"))
     #             print()
+            # if "Estimated Arrival" in class_info:
+            #     print("Estimated Arrival:", class_info["Estimated Arrival"])
+            #     print("Status:", class_info["Status"])
 
     a = ""
     classes = finaldata.get("classes", [])
     for class_info in classes: 
+        print()
         a+=class_info["Location"]
         a+=class_info["Day"]
         a+=class_info["Start Time"]
@@ -297,6 +301,8 @@ async def busreport(content: discord.Interaction):
                 a+=bus_info["Load Percentage"]
                 a+=bus_info.get("Status", "N/A")
 
+        if "Estimated Arrival" in class_info:
+            a+=class_info["Estimated Arrival"]
 
 
     myEmbed = discord.Embed(title="RU On Time", description="", color=0x00ff00)
