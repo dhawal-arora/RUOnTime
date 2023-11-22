@@ -1,60 +1,4 @@
 import mysql.connector as sqltor
-mycon=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND",database="customer_586593_ruontime")
-if mycon.is_connected():
-    print('Succesfully Connected to MySql')
-cursor=mycon.cursor()
-#cursor.execute("ALTER TABLE classes ADD COLUMN day varchar (15);")
-
-def housingentry(content,dorm):
-    cursor.execute(f"SELECT * FROM housing WHERE id={content.user.id}")
-    data=cursor.fetchone()
-    if data==None:
-        #cursor.execute(f"INSERT INTO servers VALUES({content.guild.id},{content.guild.name},\"F\",0,\"F\")")
-        #cursor.execute("INSERT INTO table VALUES (%s, %s, %s, %s, %s)", (content.guild.id, content.guild.name, "F",0,"F"))
-        cursor.execute("INSERT INTO housing VALUES (%s,%s,%s)", (content.user.id, dorm.name, 0))
-        mycon.commit()
-    return data
-
-#def support(buttons):
-    #buttons.add_item(discord.ui.Button(label="Invite Bot",style=discord.ButtonStyle.link,url="https://discord.com/api/oauth2/authorize?client_id=1160223557536710738&permissions=277025868800&scope=bot"))
-    #buttons.add_item(discord.ui.Button(label="Support Server",style=discord.ButtonStyle.link,url="https://discord.gg/Se4VW4Vcey"))
-    #buttons.add_item(discord.ui.Button(label="Write Review",style=discord.ButtonStyle.link,url="https://top.gg/bot/1119329341671747584#reviews"))
-
-#cursor.execute("DELETE FROM servers")
-#cursor.execute("DELETE FROM votekick")
-#cursor.execute("DELETE FROM vip_block")
-#mycon.commit()
-
-'''
-CREATE TABLE servers(
-    id numeric(23) NOT NULL PRIMARY KEY,
-    name varchar(100) NOT NULL,
-    status varchar (1),
-    no_drags integer,
-    vk_status varchar(1),
-);
-CREATE TABLE blocked_vc(
-    server_id numeric(23) NOT NULL,
-    vc_id numeric(23) NOT NULL,
-);
-CREATE INDEX blocked_vc_ind1
-ON blocked_vc(server_id)
-
-CREATE TABLE vip_block(
-    server_id numeric(23) NOT NULL,
-    member_id numeric(23) NOT NULL); 
-
-CREATE INDEX vip_block_ind1 
-ON vip_block(server_id)
-
-CREATE TABLE votekick (
-  server_id numeric(23) NOT NULL,
-  vc_id numeric(23) NOT NULL,
-  member_id numeric(23) NOT NULL);
-
-ALTER TABLE votekick 
-ADD initialize varchar(1);
-'''
 from typing import Any, final
 import os
 import discord
@@ -65,8 +9,13 @@ import math
 import datetime
 from discord.ext import tasks
 import pytz
-import compile 
+import compileresult 
 from datetime import datetime as dhawal
+
+mycon=sqltor.connect(host="",user="", passwd="",database="")
+if mycon.is_connected():
+    print('Succesfully Connected to MySql')
+cursor=mycon.cursor()
 
 client = commands.Bot(command_prefix=['d.'], intents=discord.Intents.all())
 client.remove_command("help")
@@ -77,6 +26,25 @@ async def on_ready():
   await client.wait_until_ready()
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/busreport"))
   await client.tree.sync()
+
+#cursor.execute("CREATE TABLE housing(id numeric(23) NOT NULL PRIMARY KEY,dorm varchar(200) NOT NULL,scheduleopen integer NOT NULL);")
+#cursor.execute("DELETE FROM classes;")
+#cursor.execute("CREATE TABLE classes(id numeric(23) NOT NULL,location varchar(200) NOT NULL,classname varchar(200) NOT NULL,starttime time NOT NULL,endtime time NOT NULL,day varchar(200) NOT NULL);")
+
+def housingentry(content,dorm):
+    cursor.execute(f"SELECT * FROM housing WHERE id={content.user.id}")
+    data=cursor.fetchone()
+    if data==None:
+        cursor.execute("INSERT INTO housing VALUES (%s,%s,%s)", (content.user.id, dorm.name, 0))
+        mycon.commit()
+    elif data[1] !=dorm.name:
+        cursor.execute(f"UPDATE housing SET dorm=\"{dorm.name}\" WHERE id={content.user.id};")
+        mycon.commit()
+        cursor.execute(f"SELECT * FROM housing WHERE id={content.user.id}")
+        data=cursor.fetchone()
+    elif data[1]== dorm.name:
+        data="already"
+    return data
 
 
 @client.tree.command(name="help", description="Help command.")
@@ -114,7 +82,7 @@ class MyCog(commands.Cog):
         print("My task is running!")          
 
 '''
-discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GNxc25.IxiNXrv_ueKCnMXKDAe88jF1DaAw5mvgDrqeMY"
+discordtoken = ""
 #----------------HOUSING--------------------------------------------
 
 @client.tree.command(name="buschhousing", description="Step 1: Enter On-campus Housing Location")
@@ -138,8 +106,14 @@ discordtoken = "MTE2MDIyMzU1NzUzNjcxMDczOA.GNxc25.IxiNXrv_ueKCnMXKDAe88jF1DaAw5m
                                discord.app_commands.Choice(name="Winkler Suites", value="B17"),
                                ])
 async def buschhousing(content: discord.Interaction, building:discord.app_commands.Choice[str]):
-   housingentry(content, building)
-   await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+   data=housingentry(content, building)
+   if data==None:
+       await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+   elif data[1]==building.name:
+       await content.response.send_message(content=f"Housing Updated to {building.name}", ephemeral=True)  
+   elif data=="already":
+       await content.response.send_message(content=f"{building.name}is already added to the database.", ephemeral=True) 
+       
 
 
 @client.tree.command(name="collegeavehousing", description="Step 1: Enter On-campus Housing Location")
@@ -162,8 +136,13 @@ async def buschhousing(content: discord.Interaction, building:discord.app_comman
                                discord.app_commands.Choice(name="Wessels Hall", value="C16"),
                                ])
 async def collegeavehousing(content: discord.Interaction, building:discord.app_commands.Choice[str]):
-   housingentry(content, building)
-   await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+   data=housingentry(content, building)
+   if data==None:
+       await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+   elif data[1]==building.name:
+       await content.response.send_message(content=f"Housing Updated to {building.name}", ephemeral=True)  
+   elif data=="already":
+       await content.response.send_message(content=f"{building.name}is already added to the database.", ephemeral=True) 
 
 @client.tree.command(name="cookdoughousing", description="Step 1: Enter On-campus Housing Location")
 @discord.app_commands.choices(building=
@@ -181,8 +160,13 @@ async def collegeavehousing(content: discord.Interaction, building:discord.app_c
                                discord.app_commands.Choice(name="Woodbury Bunting-Cobb Hall", value="D12"),
                                ])
 async def cookdoughousing(content: discord.Interaction, building:discord.app_commands.Choice[str]):
-   housingentry(content, building)
-   await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+    data=housingentry(content, building)
+    if data==None:
+       await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+    elif data[1]==building.name:
+       await content.response.send_message(content=f"Housing Updated to {building.name}", ephemeral=True)  
+    elif data=="already":
+       await content.response.send_message(content=f"{building.name}is already added to the database.", ephemeral=True) 
 
 @client.tree.command(name="livihousing", description="Step 1: Enter On-campus Housing Location")
 @discord.app_commands.choices(building=
@@ -194,8 +178,13 @@ async def cookdoughousing(content: discord.Interaction, building:discord.app_com
                                discord.app_commands.Choice(name="Quad 3", value="L6"),
                                ])
 async def livihousing(content: discord.Interaction, building:discord.app_commands.Choice[str]):
-   housingentry(content, building)
-   await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+    data=housingentry(content, building)
+    if data==None:
+       await content.response.send_message(content=f"{building.name} has been added as your housing. Use /openschedule to add classes.", ephemeral=True)
+    elif data[1]==building.name:
+       await content.response.send_message(content=f"Housing Updated to {building.name}", ephemeral=True)  
+    elif data=="already":
+       await content.response.send_message(content=f"{building.name}is already added to the database.", ephemeral=True) 
 
 #--------------------REGULAR COMMANDS--------------------------------
 
@@ -262,7 +251,7 @@ async def deletehousing(content: discord.Interaction):
 async def busreport(content: discord.Interaction):
     dt=dhawal.today()
     dayweek=dt.strftime('%A')
-    finaldata=compile.check_class_timings(content.user.id,dayweek)
+    finaldata=compileresult.check_class_timings(content.user.id,dayweek)
 
     # print(finaldata)
     # classes = finaldata.get("classes", [])
@@ -303,7 +292,7 @@ async def busreport(content: discord.Interaction):
 
         if "Estimated Arrival" in class_info:
             a+="You will arrive to class at "+str(class_info["Estimated Arrival"])+"\n\n"
-
+    a+="You will be _____ minutes late to class.\nGPT Health Advice:\n Add a Bus Review:__Click Here__\nClick here to __TIP__ the Bus Driver"
 
     myEmbed = discord.Embed(title="RU On Time", description=f"{a}", color=0x00ff00)
     #buttons=Empty()
@@ -427,6 +416,8 @@ async def buschclass(content: discord.Interaction, location:discord.app_commands
     data=cursor.fetchone()
     if data==None:
         await content.response.send_message(content="Please add Dorm first using /housing (Step:1)", ephemeral=True)
+    elif data[2]==0:
+        await content.response.send_message(content="Please use /openschedule before this command.", ephemeral=True)
     else:
         if (starthour.name*60)+startminute.name < (endhour.name*60)+endminute.name:
             cursor.execute("INSERT INTO classes VALUES (%s,%s,%s,%s,%s,%s)", (content.user.id, location.name, classname,datetime.time(starthour.name,startminute.name), datetime.time(endhour.name,endminute.name),day.name))
@@ -541,6 +532,8 @@ async def liviclass(content: discord.Interaction, location:discord.app_commands.
     data=cursor.fetchone()
     if data==None:
         await content.response.send_message(content="Please add Dorm first using /housing (Step:1)", ephemeral=True)
+    elif data[2]==0:
+        await content.response.send_message(content="Please use /openschedule before this command.", ephemeral=True)
     else:
         if (starthour.name*60)+startminute.name < (endhour.name*60)+endminute.name:
             cursor.execute("INSERT INTO classes VALUES (%s,%s,%s,%s,%s,%s)", (content.user.id, location.name, classname,datetime.time(starthour.name,startminute.name), datetime.time(endhour.name,endminute.name),day.name))
@@ -665,6 +658,8 @@ async def collegeaveclass(content: discord.Interaction, location:discord.app_com
     data=cursor.fetchone()
     if data==None:
         await content.response.send_message(content="Please add Dorm first using /housing (Step:1)", ephemeral=True)
+    elif data[2]==0:
+        await content.response.send_message(content="Please use /openschedule before this command.", ephemeral=True)
     else:
         if (starthour.name*60)+startminute.name < (endhour.name*60)+endminute.name:
             cursor.execute("INSERT INTO classes VALUES (%s,%s,%s,%s,%s,%s)", (content.user.id, location.name, classname,datetime.time(starthour.name,startminute.name), datetime.time(endhour.name,endminute.name),day.name))
@@ -790,6 +785,8 @@ async def cookdougclass(content: discord.Interaction, location:discord.app_comma
     data=cursor.fetchone()
     if data==None:
         await content.response.send_message(content="Please add Dorm first using /housing (Step:1)", ephemeral=True)
+    elif data[2]==0:
+        await content.response.send_message(content="Please use /openschedule before this command.", ephemeral=True)
     else:
         if (starthour.name*60)+startminute.name < (endhour.name*60)+endminute.name:
             cursor.execute("INSERT INTO classes VALUES (%s,%s,%s,%s,%s,%s)", (content.user.id, location.name, classname,datetime.time(starthour.name,startminute.name), datetime.time(endhour.name,endminute.name),day.name))

@@ -42,7 +42,6 @@ def getStaton():
 
     return stations
 
-# print(getTrain())
-#print()
-#print(getStaton())
-
+#trains=list(getTrain().items())
+#print(trains[0])
+#print("divider")

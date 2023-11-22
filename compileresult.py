@@ -118,6 +118,7 @@ for key, val in stations.items():
     lon = val.get("lon")
     simpleStation[name] = [lat, lon]
 
+
 # Create the simpleBus dictionary
 simpleBus = {}
 
@@ -139,6 +140,7 @@ for train_id, train_info in trains.items():
 
         simpleBus[station_name].append({"ETA": date_time_eta, "Load Percentage": percentage, "Bus Number": train_name})
 
+#print (simpleBus)
 # Define a function to calculate the closest bus stop to a location
 def find_closest_bus_stop(location):
     min_distance = float('inf')
@@ -149,13 +151,11 @@ def find_closest_bus_stop(location):
         if distance < min_distance:
             min_distance = distance
             closest_stop = stop
-
     return closest_stop
 
 
 # # Define a function to check if you'll be late for classes
 # def check_class_timings(class_id, day):
-#     connector=sqltor.connect(host="na05-sql.pebblehost.com",user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND",database="customer_586593_ruontime")
 #     cur = connector.cursor()
 #     result = {}
 #     cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
@@ -222,7 +222,7 @@ def calculate_estimated_arrival(bus_timings, current_time):
 
 # Define a function to check if you'll be late for classes
 def check_class_timings(class_id, day):
-    connector = sqltor.connect(host="na05-sql.pebblehost.com", user="customer_586593_ruontime", passwd="~8DRfiI~Y5e~V!Hv-ZND", database="customer_586593_ruontime")
+    connector = sqltor.connect(host="",user="", passwd="",database="")
     cur = connector.cursor()
     result = {}
     
@@ -230,7 +230,7 @@ def check_class_timings(class_id, day):
     cur.execute("SELECT dorm FROM housing WHERE id=(%s)", (class_id,))
     dorm_result = cur.fetchone()
 
-    if dorm_result is not None:
+    if dorm_result != None:
         dorm = dorm_result[0]
         schedule = {dorm: dorms[dorm]}
     else:
@@ -259,7 +259,7 @@ def check_class_timings(class_id, day):
             "Closest Bus Stop": closest_bus_stop
         }
 
-        if closest_bus_stop is not None:
+        if closest_bus_stop != None:
             # Now, you can check the bus timings for the closest bus stop from simpleBus
             if closest_bus_stop in simpleBus:
                 bus_timings = simpleBus[closest_bus_stop]
@@ -291,10 +291,9 @@ def check_class_timings(class_id, day):
     return result
 
 # Call the check_class_timings function for a specific class and day
-class_id = 102
-day = "Thursday"
-result = check_class_timings(class_id, day) # For testing, you can print the result, but you can return it to an external user as needed
-print(result)
+#class_id = 102
+#day = "Thursday"
+#result = check_class_timings(class_id, day) # For testing, you can print the result, but you can return it to an external user as needed
 
 # Close the MySQL connection
 
