@@ -1,47 +1,20 @@
-import json
 import requests
 
-def getTrain():
-    r = requests.get('https://store.piemadd.com/passio_go/rutgers')
-    a = r.json()
+_API_URL = "https://store.piemadd.com/passio_go/rutgers"
 
-    # dictionary to keep record of the live bus times
-    trains = dict()
 
-    for i, j in a.items():
-        if i == "trains":
-            for a, b in j.items(): 
-                trains[a] = b
-
-    # removing the unneccesary keys from trains
-    for key, val in trains.items():
-        del trains[key]['heading']
-        del trains[key]['lineCode']
-        del trains[key]['lineColor']
-        del trains[key]['lineTextColor']
-        for i in trains[key]['predictions']:
-            del i['noETA']
-        del trains[key]['extra']['info']
-
+def get_trains() -> dict:
+    raw = requests.get(_API_URL).json()
+    trains = dict(raw.get("trains", {}))
+    for train in trains.values():
+        for field in ("heading", "lineCode", "lineColor", "lineTextColor"):
+            train.pop(field, None)
+        for prediction in train.get("predictions", []):
+            prediction.pop("noETA", None)
+        train.get("extra", {}).pop("info", None)
     return trains
 
 
-def getStaton():
-
-    r = requests.get('https://store.piemadd.com/passio_go/rutgers')
-
-    a = r.json()
-
-    # dictionary to keep record of the bus stops and the busses coming to them 
-    stations = dict()
-
-    for i, j in a.items(): 
-        if i == "stations":
-            for a, b in j.items(): 
-                stations[a] = b
-
-    return stations
-
-#trains=list(getTrain().items())
-#print(trains[0])
-#print("divider")
+def get_stations() -> dict:
+    raw = requests.get(_API_URL).json()
+    return dict(raw.get("stations", {}))
