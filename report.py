@@ -45,8 +45,7 @@ def _next_arriving(bus_timings: list, after: datetime.datetime) -> datetime.date
 
 
 def check_class_timings(user_id: int, day: str) -> dict:
-    trains = data.get_trains()
-    stations = data.get_stations()
+    trains, stations = data.fetch()
     smap = _station_map(stations)
     bmap = _bus_map(trains)
 
